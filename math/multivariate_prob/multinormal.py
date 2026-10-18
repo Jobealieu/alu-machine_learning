@@ -35,8 +35,10 @@ class MultiNormal:
         d = self.cov.shape[0]
         if x.shape != (d, 1):
             raise ValueError("x must have the shape ({}, 1)".format(d))
+        det = np.linalg.det(self.cov)
+        inv = np.linalg.inv(self.cov)
+        pdf = 1.0 / np.sqrt(((2 * np.pi) ** d) * det)
         diff = x - self.mean
-        exponent = -0.5 * np.matmul(
-            np.matmul(diff.T, np.linalg.inv(self.cov)), diff)
-        denominator = np.sqrt(((2 * np.pi) ** d) * np.linalg.det(self.cov))
-        return float(np.exp(exponent[0][0]) / denominator)
+        mult = np.matmul(np.matmul(diff.T, inv), diff)
+        pdf *= np.exp(-0.5 * mult)
+        return pdf[0][0]
